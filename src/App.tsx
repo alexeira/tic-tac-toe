@@ -56,7 +56,8 @@ export default function App() {
 
     if (newWinner) {
       setWinner(newWinner)
-      alert(`Winner is ${newWinner}`)
+    } else if (checkTie(newBoard)) {
+      setWinner(false)
     }
   }
 
@@ -76,23 +77,46 @@ export default function App() {
     return null
   }
 
+  function resetGame() {
+    setBoard(Array(9).fill(null))
+    setTurn(TURNS.X)
+    setWinner(null)
+  }
+
+  function checkTie(newBoard: any) {
+    return newBoard.every((cell: any) => cell !== null)
+  }
+
   return (
     <main className="board">
       <h1>Tic Tac Toe</h1>
+      <button onClick={resetGame}>Reset</button>
       <section className="game">
-        {board.map((_, index) => {
+        {board.map((cell, index) => {
           return (
             <Cell key={index} index={index} updateBoard={updateBoard}>
-              {board[index]}
+              {cell}
             </Cell>
           )
         })}
-
-        <section className="turn">
-          <Cell isSelected={turn === TURNS.X}>{TURNS.X}</Cell>
-          <Cell isSelected={turn === TURNS.O}>{TURNS.O}</Cell>
-        </section>
       </section>
+
+      <section className="turn">
+        <Cell isSelected={turn === TURNS.X}>{TURNS.X}</Cell>
+        <Cell isSelected={turn === TURNS.O}>{TURNS.O}</Cell>
+      </section>
+
+      {winner !== null && (
+        <section className="winner">
+          <div className="text">
+            <h2>{winner === false ? 'Empate' : 'Gano'}</h2>
+            <header className="win">{winner && <Cell>{winner}</Cell>}</header>
+            <footer>
+              <button onClick={resetGame}>Empezar de nuevo</button>
+            </footer>
+          </div>
+        </section>
+      )}
     </main>
   )
 }
