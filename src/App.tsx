@@ -1,47 +1,20 @@
 import { useState } from 'react'
 import './App.css'
+import confetti from 'canvas-confetti'
 
-const TURNS = {
-  X: 'X',
-  O: 'O'
-}
-
-const winningCombos = [
-  // horizontal
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-
-  // vertical
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-
-  // diagonal
-  [0, 4, 8],
-  [2, 4, 6]
-]
-
-function Cell({ children, isSelected, updateBoard, index }: any) {
-  const className = `square ${isSelected ? 'is-selected' : ''}`
-
-  function handleClick() {
-    updateBoard(index)
-  }
-
-  return (
-    <div className={className} onClick={handleClick}>
-      {children}
-    </div>
-  )
-}
+import { Cell } from './components/Cell'
+import { WinnerModal } from './components/WinnerModal'
+import { Board } from './components/Board'
+import { TURNS } from './utils/constans'
+import { checkTie, checkWinner } from './logic/board'
+import { BoardType, Winner } from './types'
 
 export default function App() {
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState<BoardType>(Array(9).fill(null))
   const [turn, setTurn] = useState(TURNS.X)
-  const [winner, setWinner] = useState(null)
+  const [winner, setWinner] = useState<Winner>(null)
 
-  function updateBoard(index: any) {
+  function updateBoard(index: number) {
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     const newBoard = [...board]
 
@@ -55,26 +28,11 @@ export default function App() {
     const newWinner = checkWinner(newBoard)
 
     if (newWinner) {
+      confetti()
       setWinner(newWinner)
     } else if (checkTie(newBoard)) {
       setWinner(false)
     }
-  }
-
-  function checkWinner(boardToCheck: any) {
-    for (const combo of winningCombos) {
-      const [a, b, c] = combo
-
-      if (
-        boardToCheck[a] && // 0 => x or o
-        boardToCheck[a] === boardToCheck[b] &&
-        boardToCheck[a] === boardToCheck[c]
-      ) {
-        return boardToCheck[a]
-      }
-    }
-
-    return null
   }
 
   function resetGame() {
@@ -83,22 +41,12 @@ export default function App() {
     setWinner(null)
   }
 
-  function checkTie(newBoard: any) {
-    return newBoard.every((cell: any) => cell !== null)
-  }
-
   return (
     <main className="board">
       <h1>Tic Tac Toe</h1>
       <button onClick={resetGame}>Reset</button>
       <section className="game">
-        {board.map((cell, index) => {
-          return (
-            <Cell key={index} index={index} updateBoard={updateBoard}>
-              {cell}
-            </Cell>
-          )
-        })}
+        <Board board={board} updateBoard={updateBoard} />
       </section>
 
       <section className="turn">
@@ -106,17 +54,7 @@ export default function App() {
         <Cell isSelected={turn === TURNS.O}>{TURNS.O}</Cell>
       </section>
 
-      {winner !== null && (
-        <section className="winner">
-          <div className="text">
-            <h2>{winner === false ? 'Empate' : 'Gano'}</h2>
-            <header className="win">{winner && <Cell>{winner}</Cell>}</header>
-            <footer>
-              <button onClick={resetGame}>Empezar de nuevo</button>
-            </footer>
-          </div>
-        </section>
-      )}
+      <WinnerModal resetGame={resetGame} winner={winner} />
     </main>
   )
 }
