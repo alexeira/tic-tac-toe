@@ -2,7 +2,7 @@ interface CellProps {
   children?: string
   isSelected?: boolean
   updateBoard?: (index: number) => void
-  index?: number
+  index: number
 }
 
 export function Cell({ children, isSelected, updateBoard, index }: CellProps) {
